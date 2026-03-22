@@ -5,15 +5,13 @@ module Api
     before_action :set_task, only: [:update, :destroy]
     
     def index
-      user_email = session[:user_email]
-      tasks = Task.where(email_address: user_email)
+      tasks = Task.where(email_address: @current_user.email_address)
       render json: tasks, status: :ok
     end
     
     def create
-      user_email = session[:user_email]
       task = Task.new(task_params)
-      task.email_address = user_email
+      task.email_address = @current_user.email_address
       
       if task.save
         render json: task, status: :created
@@ -44,8 +42,7 @@ module Api
     private
     
     def set_task
-      user_email = session[:user_email]
-      @task = Task.find_by(id: params[:id], email_address: user_email)
+      @task = Task.find_by(id: params[:id], email_address: @current_user.email_address)
       
       unless @task
         render json: { error: "Task not found" }, status: :not_found
@@ -53,9 +50,14 @@ module Api
     end
     
     def authenticate_user!
-      unless session[:user_email]
-        render json: { error: "Unauthorized" }, status: :unauthorized
-      end
+      token = request.headers['Authorization']&.split(' ')&.last
+      return render json: { error: "No token provided" }, status: :unauthorized unless token
+      
+      payload = JwtHelper.decode(token)
+      return render json: { error: "Invalid token" }, status: :unauthorized unless payload
+      
+      @current_user = User.find_by(email_address: payload['user_id'])
+      return render json: { error: "User not found" }, status: :unauthorized unless @current_user
     end
     
     def task_params

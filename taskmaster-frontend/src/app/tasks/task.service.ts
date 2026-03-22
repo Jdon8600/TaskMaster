@@ -1,7 +1,9 @@
-import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { Injectable, signal, computed } from '@angular/core';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Task } from '../models/task.model';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { AuthService } from '../auth/auth.service';
 
 interface TaskResponse {
   id: number;
@@ -15,16 +17,46 @@ interface TaskResponse {
 @Injectable({ providedIn: 'root' })
 export class TaskService {
   private _tasks = signal<Task[]>([]);
-  private apiUrl = 'http://localhost:3000/api';
+  private apiUrl = environment.apiUrl;
 
   tasks = this._tasks.asReadonly();
+  
+  sortedTasks = computed(() => {
+    const tasks = this._tasks();
+    const statusOrder = { 'pending': 0, 'in-progress': 1, 'done': 2 };
+    return [...tasks].sort((a, b) => {
+      const aIsDone = a.status === 'done';
+      const bIsDone = b.status === 'done';
 
-  constructor(private http: HttpClient) {}
+      if (aIsDone !== bIsDone) {
+        return aIsDone ? 1 : -1;
+      }
+
+      const dueDateDiff = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      if (dueDateDiff !== 0) {
+        return dueDateDiff;
+      }
+
+      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
+      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
+      return orderA - orderB;
+    });
+  });
+
+  constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private getAuthHeaders(): HttpHeaders {
+    const token = this.authService.token();
+    return new HttpHeaders({
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    });
+  }
 
   async loadTasks(): Promise<void> {
     try {
       const response = await firstValueFrom(
-        this.http.get<TaskResponse[]>(`${this.apiUrl}/tasks`, { withCredentials: true })
+        this.http.get<TaskResponse[]>(`${this.apiUrl}/tasks`, { headers: this.getAuthHeaders() })
       );
       const tasks = response.map(task => ({
         id: task.id,
@@ -49,7 +81,7 @@ export class TaskService {
             due_date: task.dueDate,
             status: task.status
           }
-        }, { withCredentials: true })
+        }, { headers: this.getAuthHeaders() })
       );
       const newTask: Task = {
         id: response.id,
@@ -76,7 +108,7 @@ export class TaskService {
             due_date: task.dueDate,
             status: task.status
           }
-        }, { withCredentials: true })
+        }, { headers: this.getAuthHeaders() })
       );
       this._tasks.update((list) =>
         list.map((item) => (item.id === id ? { ...item, ...task } : item))
@@ -91,7 +123,7 @@ export class TaskService {
   async deleteTask(id: number): Promise<boolean> {
     try {
       await firstValueFrom(
-        this.http.delete(`${this.apiUrl}/tasks/${id}`, { withCredentials: true })
+        this.http.delete(`${this.apiUrl}/tasks/${id}`, { headers: this.getAuthHeaders() })
       );
       this._tasks.update((list) => list.filter((task) => task.id !== id));
       return true;
@@ -99,9 +131,5 @@ export class TaskService {
       console.error('Failed to delete task:', error);
       return false;
     }
-  }
-
-  clearTasks() {
-    this._tasks.set([]);
   }
 }

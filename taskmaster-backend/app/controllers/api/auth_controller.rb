@@ -9,10 +9,11 @@ module Api
       user = User.find_by(email_address: email)
       
       if user&.authenticate(password)
-        session[:user_email] = user.email_address
+        token = JwtHelper.encode({ user_id: user.id, exp: 24.hours.from_now.to_i })
         render json: { 
           message: "Login successful", 
           user: user.as_json,
+          token: token,
           authenticated: true 
         }, status: :ok
       else
@@ -37,10 +38,11 @@ module Api
       )
       
       if user.save
-        session[:user_email] = user.email_address
+        token = JwtHelper.encode({ user_id: user.id, exp: 24.hours.from_now.to_i })
         render json: { 
           message: "User created successfully", 
           user: user.as_json,
+          token: token,
           authenticated: true 
         }, status: :created
       else
@@ -52,7 +54,6 @@ module Api
     end
     
     def logout
-      session[:user_email] = nil
       render json: { message: "Logged out successfully" }, status: :ok
     end
   end

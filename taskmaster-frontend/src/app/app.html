@@ -84,10 +84,17 @@
     --danger: #ff5151;
   }
 
-  .home-page, .hero-card, .task-page {
-    min-height: 100vh;
+  .home-page {
+    height: 100dvh;
     display: grid;
     place-items: center;
+    background: radial-gradient(circle at top, #e6eeff 0%, var(--bg) 70%);
+    padding: 1.5rem;
+    box-sizing: border-box;
+    overflow-y: auto;
+  }
+
+  .hero-card, .task-page {
     background: radial-gradient(circle at top, #e6eeff 0%, var(--bg) 70%);
     padding: 1.5rem;
     box-sizing: border-box;

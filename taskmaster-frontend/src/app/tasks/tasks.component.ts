@@ -45,13 +45,13 @@ import { AuthService } from '../auth/auth.service';
         </div>
       </form>
 
-      <div class="task-list" *ngIf="taskService.tasks().length > 0; else empty">
+      <div class="task-list" *ngIf="taskService.sortedTasks().length > 0; else empty">
         <table>
           <thead>
             <tr><th>Title</th><th>Description</th><th>Due Date</th><th>Status</th><th>Actions</th></tr>
           </thead>
           <tbody>
-            <tr *ngFor="let task of taskService.tasks()">
+            <tr *ngFor="let task of taskService.sortedTasks()">
               <td>{{ task.title }}</td>
               <td>{{ task.description }}</td>
               <td>{{ task.dueDate }}</td>
