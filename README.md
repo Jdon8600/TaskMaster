@@ -2,8 +2,8 @@
 
 TaskMaster is a full-stack task app with:
 
-- a Rails API in `taskmaster-backend`
-- an Angular app in `taskmaster-frontend`
+- a Rails back-end
+- an Angular front-end
 - Capacitor support for Android builds
 
 ## Prerequisites
@@ -21,6 +21,11 @@ Install these first:
 npm install -g @angular/cli
 ```
 
+Docs for rails install:
+https://guides.rubyonrails.org/install_ruby_on_rails.html
+
+
+
 ## Repository Layout
 
 - `taskmaster-backend` - Rails API
@@ -28,7 +33,7 @@ npm install -g @angular/cli
 
 ## Backend Setup
 
-From `taskmaster-backend`:
+Navigate to `/taskmaster-backend` and run:
 
 ```bash
 bundle install
@@ -43,7 +48,7 @@ Notes:
 
 ## Frontend Setup
 
-From `taskmaster-frontend`:
+Navigate to `/taskmaster-frontend` and run:
 
 ```bash
 npm install
@@ -65,13 +70,13 @@ That value is defined in `taskmaster-frontend/src/environments/environment.ts`.
 If the frontend is not running in the same environment as the Rails server, update the API URL to your machine's local IP:
 
 ```ts
-apiUrl: 'http://YOUR_LOCAL_IP:3000/api'
+apiUrl: 'http://<YOUR_LOCAL_IP>:3000/api'
 ```
 
 Example:
 
 ```ts
-apiUrl: 'http://192.168.1.25:3000/api'
+apiUrl: 'http://192.168.x.x:3000/api'
 ```
 
 For the Android emulator, use:
@@ -100,7 +105,7 @@ Backend:
 
 ```bash
 cd taskmaster-backend
-bundle exec rails test
+rails test
 ```
 
 Frontend:
@@ -108,22 +113,4 @@ Frontend:
 ```bash
 cd taskmaster-frontend
 ng test
-```
-
-## Quick Start
-
-Use two terminals.
-
-Terminal 1:
-
-```bash
-cd taskmaster-backend
-bin/rails server -b 0.0.0.0 -p 3000
-```
-
-Terminal 2:
-
-```bash
-cd taskmaster-frontend
-ng serve --host 0.0.0.0 --port 4200
 ```
