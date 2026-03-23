@@ -12,10 +12,18 @@ Install these first:
 
 - Ruby 3.x
 - Bundler
-- PostgreSQL
+- PostgreSQL:
+```bash
+sudo apt install postgresql postgresql-contrib -y
+sudo systemctl status postgresql
+sudo -i -u postgres
+psql
+CREATE USER myuser WITH PASSWORD 'aStrongPassword';
+\q to exit
+```
 - Node.js
 - npm
--android-studio if you want to emulate on mobile device
+- android-studio if you want to emulate on mobile device
 - Angular CLI if you want to run `ng` directly:
 
 ```bash
