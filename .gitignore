@@ -25,6 +25,9 @@ Thumbs.db
 !.vscode/extensions.json
 !.vscode/mcp.json
 .history/*
+.github/workflows/*
+.github/dependabot.yml
+
 
 # ============
 # Backend (Rails)
