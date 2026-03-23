@@ -123,10 +123,13 @@ ng test
 
 -there is no current need for cascading operations (Updates/deletes)
 
+-emails wont change in the future. One-to-many relationship wont be disrupted
+
 ## Key Decisions 
 
 ### User table
 email_address defined as a primary key to enforce uniqueness
+
 
 ### Task table
 email_address is listed as a foreign key for possible future cascading operations and solidifying a one to many relationship beteewn user table and tasks table
