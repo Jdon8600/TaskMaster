@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_22_162047) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_22_223500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -19,10 +19,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_22_162047) do
     t.text "description"
     t.date "due_date"
     t.string "email_address", null: false
-    t.string "status", default: "pending"
+    t.string "status", default: "pending", null: false
     t.string "title", null: false
     t.datetime "updated_at", null: false
     t.index ["email_address"], name: "index_tasks_on_email_address"
+    t.check_constraint "status::text = ANY (ARRAY['pending'::character varying, 'in_progress'::character varying, 'done'::character varying]::text[])", name: "tasks_status_check"
   end
 
   create_table "users", primary_key: "email_address", id: :string, force: :cascade do |t|

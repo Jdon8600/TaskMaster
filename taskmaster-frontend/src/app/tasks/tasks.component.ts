@@ -35,7 +35,7 @@ import { AuthService } from '../auth/auth.service';
           <label>Status</label>
           <select [(ngModel)]="taskForm.status" name="status" required>
             <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
+            <option value="in_progress">In Progress</option>
             <option value="done">Done</option>
           </select>
         </div>
@@ -55,7 +55,7 @@ import { AuthService } from '../auth/auth.service';
               <td>{{ task.title }}</td>
               <td>{{ task.description }}</td>
               <td>{{ task.dueDate }}</td>
-              <td>{{ task.status }}</td>
+              <td>{{ formatStatus(task.status) }}</td>
               <td>
                 <button class="mini-btn" (click)="openEdit(task)">Edit</button>
                 <button class="mini-btn delete" (click)="deleteTask(task.id)">Delete</button>
@@ -92,7 +92,7 @@ import { AuthService } from '../auth/auth.service';
             <label>Status</label>
             <select [(ngModel)]="editForm.status" name="editStatus" required>
               <option value="pending">Pending</option>
-              <option value="in-progress">In Progress</option>
+                <option value="in_progress">In Progress</option>
               <option value="done">Done</option>
             </select>
           </div>
@@ -212,5 +212,9 @@ export class TasksComponent implements OnInit {
       dueDate: '',
       status: 'pending'
     };
+  }
+
+  formatStatus(status: Task['status']) {
+    return status === 'in_progress' ? 'In Progress' : status.charAt(0).toUpperCase() + status.slice(1);
   }
 }

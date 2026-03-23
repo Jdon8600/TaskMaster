@@ -11,6 +11,8 @@ describe('AuthService', () => {
   let routerSpy: any;
 
   beforeEach(() => {
+    localStorage.clear();
+
     httpClientSpy = {
       post: vi.fn()
     };
@@ -35,13 +37,13 @@ describe('AuthService', () => {
     it('should return true on successful login', async () => {
       const email = 'test@example.com';
       const password = 'password';
-      const mockResponse = { authenticated: true, user: {}, message: 'Logged in' };
+      const mockResponse = { authenticated: true, user: {}, message: 'Logged in', token: 'jwt-token' };
 
       httpClientSpy.post.mockReturnValue(of(mockResponse));
 
       const result = service.login(email, password);
 
-      expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:3000/api/login', { email, password }, { withCredentials: true });
+      expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:3000/api/login', { email, password });
       expect(await result).toBe(true);
       expect(service.isAuthenticated()).toBe(true);
       expect(service.userEmail()).toBe(email);
@@ -86,13 +88,13 @@ describe('AuthService', () => {
       const lastName = 'Doe';
       const email = 'john@example.com';
       const password = 'password';
-      const mockResponse = { authenticated: true, user: {}, message: 'Signed up' };
+      const mockResponse = { authenticated: true, user: {}, message: 'Signed up', token: 'jwt-token' };
 
       httpClientSpy.post.mockReturnValue(of(mockResponse));
 
       const result = service.signup(firstName, lastName, email, password);
 
-      expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:3000/api/signup', { firstName, lastName, email, password }, { withCredentials: true });
+      expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:3000/api/signup', { firstName, lastName, email, password });
       expect((await result).success).toBe(true);
       expect(service.isAuthenticated()).toBe(true);
       expect(service.userEmail()).toBe(email);
@@ -132,12 +134,17 @@ describe('AuthService', () => {
     it('should clear authentication state and navigate to home', async () => {
       service['_isAuthenticated'].set(true);
       service['_userEmail'].set('test@example.com');
+      service['_token'].set('jwt-token');
 
       httpClientSpy.post.mockReturnValue(of({}));
 
       await service.logout();
 
-      expect(httpClientSpy.post).toHaveBeenCalledWith('http://localhost:3000/api/logout', {}, { withCredentials: true });
+      expect(httpClientSpy.post).toHaveBeenCalledWith(
+        'http://localhost:3000/api/logout',
+        {},
+        { headers: { Authorization: 'Bearer jwt-token' } }
+      );
       expect(service.isAuthenticated()).toBe(false);
       expect(service.userEmail()).toBe(null);
       expect(routerSpy.navigate).toHaveBeenCalledWith(['/']);
@@ -146,6 +153,7 @@ describe('AuthService', () => {
     it('should clear state even on logout error', async () => {
       service['_isAuthenticated'].set(true);
       service['_userEmail'].set('test@example.com');
+      service['_token'].set('jwt-token');
 
       httpClientSpy.post.mockReturnValue(throwError(() => new Error('network error')));
 

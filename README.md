@@ -15,6 +15,7 @@ Install these first:
 - PostgreSQL
 - Node.js
 - npm
+-android-studio if you want to emulate on mobile device
 - Angular CLI if you want to run `ng` directly:
 
 ```bash
@@ -114,3 +115,26 @@ Frontend:
 cd taskmaster-frontend
 ng test
 ```
+
+## Assumptions made
+
+
+-User wants tasks in order based on status then due date
+
+-there is no current need for cascading operations (Updates/deletes)
+
+## Key Decisions 
+
+### User table
+email_address defined as a primary key to enforce uniqueness
+
+### Task table
+email_address is listed as a foreign key for possible future cascading operations and solidifying a one to many relationship beteewn user table and tasks table
+
+status stored as an enum for space efficiency, consistency, and speed. Also allows for easier extentions of metrics gathering based on the status of tasks in the future. this switched from originally being stored as a string
+
+## Auth
+switched from credentials based auth to token based auth for coss-platform capabilites and more flexibilty with session times
+
+
+

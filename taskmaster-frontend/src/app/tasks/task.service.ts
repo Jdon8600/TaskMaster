@@ -10,7 +10,7 @@ interface TaskResponse {
   title: string;
   description: string;
   due_date: string;
-  status: string;
+  status: 'pending' | 'in-progress' | 'in_progress' | 'done';
   email_address: string;
 }
 
@@ -22,28 +22,37 @@ export class TaskService {
   tasks = this._tasks.asReadonly();
   
   sortedTasks = computed(() => {
-    const tasks = this._tasks();
-    const statusOrder = { 'pending': 0, 'in-progress': 1, 'done': 2 };
-    return [...tasks].sort((a, b) => {
-      const aIsDone = a.status === 'done';
-      const bIsDone = b.status === 'done';
+    const statusOrder: Record<Task['status'], number> = {
+      pending: 0,
+      in_progress: 1,
+      done: 2
+    };
 
-      if (aIsDone !== bIsDone) {
-        return aIsDone ? 1 : -1;
+    const dueTimestamp = (dueDate: string) => {
+      const timestamp = Date.parse(dueDate);
+      return Number.isNaN(timestamp) ? Number.POSITIVE_INFINITY : timestamp;
+    };
+
+    return [...this._tasks()].sort((a, b) => {
+      const statusDiff = statusOrder[a.status] - statusOrder[b.status];
+      if (statusDiff !== 0) {
+        return statusDiff;
       }
 
-      const dueDateDiff = new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime();
+      const dueDateDiff = dueTimestamp(a.dueDate) - dueTimestamp(b.dueDate);
       if (dueDateDiff !== 0) {
         return dueDateDiff;
       }
 
-      const orderA = statusOrder[a.status as keyof typeof statusOrder] ?? 999;
-      const orderB = statusOrder[b.status as keyof typeof statusOrder] ?? 999;
-      return orderA - orderB;
+      return a.id - b.id;
     });
   });
 
   constructor(private http: HttpClient, private authService: AuthService) {}
+
+  private normalizeStatus(status: TaskResponse['status']): Task['status'] {
+    return status === 'in-progress' ? 'in_progress' : status;
+  }
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.token();
@@ -63,7 +72,7 @@ export class TaskService {
         title: task.title,
         description: task.description,
         dueDate: task.due_date,
-        status: task.status as any
+        status: this.normalizeStatus(task.status)
       }));
       this._tasks.set(tasks);
     } catch (error: any) {
@@ -88,7 +97,7 @@ export class TaskService {
         title: response.title,
         description: response.description,
         dueDate: response.due_date,
-        status: response.status as any
+        status: this.normalizeStatus(response.status)
       };
       this._tasks.update((list) => [...list, newTask]);
       return newTask;

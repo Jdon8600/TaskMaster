@@ -35,7 +35,7 @@ module Api
         title: "Test Task 2",
         description: "Description 2",
         due_date: "2026-03-26",
-        status: "in-progress",
+        status: "in_progress",
         email_address: @user.email_address
       )
 
