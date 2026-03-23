@@ -33,7 +33,7 @@ export class AuthService {
     if (storedToken) {
       this._token.set(storedToken);
       this._isAuthenticated.set(true);
-      // You might want to validate the token here
+      // You might want to validate the token here (I'll revisit this in the future)
     }
   }
 
